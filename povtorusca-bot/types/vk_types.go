@@ -14,13 +14,20 @@ type VKCallback struct {
 
 // WallPost represents a wall post object from VK
 type WallPost struct {
-	ID          int          `json:"id"`
-	FromID      int          `json:"from_id"`
-	OwnerID     int          `json:"owner_id"`
-	Date        int          `json:"date"`
-	PostType    string       `json:"post_type"`
-	Text        string       `json:"text"`
-	Attachments []Attachment `json:"attachments"`
+	ID             int             `json:"id"`
+	FromID         int             `json:"from_id"`
+	OwnerID        int             `json:"owner_id"`
+	Date           int             `json:"date"`
+	PostType       string          `json:"post_type"`
+	Text           string          `json:"text"`
+	Attachments    []Attachment    `json:"attachments"`
+	PostAuthorData *PostAuthorData `json:"post_author_data"`
+}
+
+// PostAuthorData represents author information
+type PostAuthorData struct {
+	Author    int `json:"author"`
+	Publisher int `json:"publisher"`
 }
 
 // Attachment represents an attachment in a VK post

@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"povtorushka-bot/services/telegram"
 	"povtorushka-bot/types"
+	"strconv"
 )
 
 func HandleWallPostNew(object json.RawMessage, tgService *telegram.Service) error {
@@ -17,6 +18,10 @@ func HandleWallPostNew(object json.RawMessage, tgService *telegram.Service) erro
 	}
 
 	slog.Debug("Parsed wall post", "post", post)
+	if post.PostType != "post" {
+		slog.Warn("post_type != 'post'", "post_type", post.PostType)
+		return nil
+	}
 
 	slog.Info("New wall post received",
 		"id", post.ID,
@@ -44,7 +49,14 @@ func HandleWallPostNew(object json.RawMessage, tgService *telegram.Service) erro
 	}
 	slog.Info("Total photos to send", "count", len(photoURLs))
 
-	if err := tgService.SendContent(post.Text, photoURLs); err != nil {
+	// Формируем ссылку на автора
+	var authorURL string
+	if post.PostAuthorData != nil && post.PostAuthorData.Author != 0 {
+		authorURL = "https://vk.com/id" + strconv.Itoa(post.PostAuthorData.Author)
+		slog.Debug("Author URL generated", "author_id", post.PostAuthorData.Author, "url", authorURL)
+	}
+
+	if err := tgService.SendContent(post.Text, photoURLs, authorURL); err != nil {
 		slog.Error("Error sending to Telegram", "error", err)
 		return err
 	}

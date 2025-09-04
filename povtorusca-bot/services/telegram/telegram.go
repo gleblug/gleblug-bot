@@ -39,6 +39,7 @@ func (s *Service) SendText(text string) error {
 	slog.Debug("Text message details", "chat_id", s.chatID, "text", text)
 
 	msg := tgbotapi.NewMessage(s.chatID, text)
+	msg.ParseMode = "Markdown"
 
 	sentMsg, err := s.bot.Send(msg)
 	if err != nil {
@@ -59,6 +60,7 @@ func (s *Service) SendPhotosWithText(text string, photoURLs []string) error {
 		inputMedia := tgbotapi.NewInputMediaPhoto(tgbotapi.FileURL(photoURL))
 		if i == 0 && text != "" {
 			inputMedia.Caption = text
+			inputMedia.ParseMode = "Markdown"
 		}
 
 		mediaGroup = append(mediaGroup, inputMedia)
@@ -77,15 +79,19 @@ func (s *Service) SendPhotosWithText(text string, photoURLs []string) error {
 	return nil
 }
 
-func (s *Service) SendContent(text string, photoURLs []string) error {
+func (s *Service) SendContent(text string, photoURLs []string, authorURL string) error {
 	hasPhotos := len(photoURLs) > 0
 	hasText := text != ""
 
-	slog.Debug("SendContent called", "has_text", hasText, "has_photos", hasPhotos, "photo_count", len(photoURLs))
+	slog.Debug("SendContent called", "has_text", hasText, "has_photos", hasPhotos, "photo_count", len(photoURLs), "author_url", authorURL)
 
 	if !hasPhotos && !hasText {
 		slog.Info("No content to send (neither text nor photos)")
 		return nil
+	}
+
+	if authorURL != "" {
+		text += "\n\n[Связаться с автором](" + authorURL + ")"
 	}
 
 	if hasPhotos {
